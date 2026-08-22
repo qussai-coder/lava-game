@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Lava Game</title>
+
+    <style>
+        body {
+            background: #111;
+            color: white;
+            text-align: center;
+            font-family: Arial;
+        }
+
+        #info {
+            font-size: 25px;
+        }
+
+        #game {
+            width: 800px;
+            height: 500px;
+            background: #222;
+            margin: 20px auto;
+            position: relative;
+            border: 3px solid white;
+        }
+
+        #box {
+            width: 50px;
+            height: 50px;
+            background: yellow;
+            position: absolute;
+            cursor: pointer;
+        }
+
+        #screen {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #screen h2 {
+            color: red;
+            font-size: 60px;
+        }
+
+        #winScreen {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #winScreen h2 {
+            color: lime;
+            font-size: 70px;
+        }
+
+        #replay,
+        #winReplay {
+            font-size: 25px;
+            padding: 12px 30px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🎮 اضغط على المربع!</h1>
+
+<div id="info">
+    SCORE: <span id="score">0</span>
+    &nbsp;&nbsp;&nbsp;
+    BEST: <span id="best">0</span>
+    &nbsp;&nbsp;&nbsp;
+    TIME: <span id="time">60</span>
+</div>
+
+<div id="game">
+
+    <div id="box"></div>
+
+    <!-- شاشة الخسارة -->
+    <div id="screen">
+        <h2>YOU LOSE</h2>
+        <div>SCORE: <span id="finalScore">0</span></div>
+        <br>
+        <button id="replay">REPLAY 🔄</button>
+    </div>
+
+    <!-- شاشة الفوز عند انتهاء الوقت -->
+    <div id="winScreen">
+        <h2>✅</h2>
+        <div style="font-size:35px;">
+            SCORE: <span id="winScore">0</span>
+        </div>
+        <br>
+        <button id="winReplay">REPLAY 🔄</button>
+    </div>
+
+</div>
+
+<script>
+
+    let score = 0;
+    let time = 60;
+    let gameOver = false;
+    let timer;
+
+    let bestScore = localStorage.getItem("bestScore") || 0;
+
+    document.getElementById("best").textContent = bestScore;
+
+    const game = document.getElementById("game");
+    const box = document.getElementById("box");
+    const screen = document.getElementById("screen");
+    const winScreen = document.getElementById("winScreen");
+
+    function moveBox() {
+
+        let x = Math.random() * (game.clientWidth - 50);
+        let y = Math.random() * (game.clientHeight - 50);
+
+        box.style.left = x + "px";
+        box.style.top = y + "px";
+    }
+
+    box.onclick = function(event) {
+
+        event.stopPropagation();
+
+        if (gameOver) return;
+
+        score++;
+
+        document.getElementById("score").textContent = score;
+
+        if (score > bestScore) {
+
+            bestScore = score;
+
+            localStorage.setItem("bestScore", bestScore);
+
+            document.getElementById("best").textContent = bestScore;
+        }
+
+        moveBox();
+    };
+
+    game.onclick = function() {
+
+        if (gameOver) return;
+
+        gameOver = true;
+
+        clearInterval(timer);
+
+        document.getElementById("finalScore").textContent = score;
+
+        box.style.display = "none";
+
+        screen.style.display = "flex";
+    };
+
+    function startGame() {
+
+        score = 0;
+        time = 60;
+        gameOver = false;
+
+        document.getElementById("score").textContent = "0";
+        document.getElementById("time").textContent = "60";
+        document.getElementById("best").textContent = bestScore;
+
+        box.style.display = "block";
+
+        screen.style.display = "none";
+        winScreen.style.display = "none";
+
+        moveBox();
+
+        clearInterval(timer);
+
+        timer = setInterval(function() {
+
+            time--;
+
+            document.getElementById("time").textContent = time;
+
+            if (time <= 0) {
+
+                clearInterval(timer);
+
+                gameOver = true;
+
+                box.style.display = "none";
+
+                // عرض علامة الصح والسكور
+                document.getElementById("winScore").textContent = score;
+
+                winScreen.style.display = "flex";
+            }
+
+        }, 1000);
+    }
+
+    document.getElementById("replay").onclick = function(event) {
+
+        event.stopPropagation();
+
+        startGame();
+    };
+
+    document.getElementById("winReplay").onclick = function(event) {
+
+        event.stopPropagation();
+
+        startGame();
+    };
+
+    startGame();
+
+</script>
+
+</body>
+</html>
